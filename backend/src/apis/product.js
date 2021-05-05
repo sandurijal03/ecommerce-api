@@ -5,7 +5,9 @@ import Product from '../models/product';
 const router = Router();
 
 router.get('/', async (req, res) => {
-  const products = await Product.find().select('name image -_id');
+  const products = await Product.find()
+    .select('name image')
+    .populate('category');
   if (!products) {
     res.status(500).json({ success: false, message: 'Product List is empty' });
   }
@@ -15,7 +17,7 @@ router.get('/', async (req, res) => {
 router.get('/:id', async (req, res) => {
   const { id } = req.params;
   try {
-    const product = await Product.findById(id);
+    const product = await Product.findById(id).populate('category');
     if (!product) {
       res
         .status(500)
