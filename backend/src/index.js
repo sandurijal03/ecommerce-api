@@ -7,6 +7,8 @@ import productApi from './apis/product';
 import userApi from './apis/user';
 import orderApi from './apis/order';
 import categoryApi from './apis/category';
+import authJwt from './helpers/auth';
+import { errorHandler } from './helpers/errorHandler';
 
 const app = express();
 
@@ -15,6 +17,8 @@ app.options('*', cors());
 
 app.use(express.json());
 app.use(morgan('tiny'));
+app.use(authJwt());
+app.use(errorHandler);
 
 mongoose
   .connect(`${process.env.DB_URI}/${process.env.DB_NAME}`, {

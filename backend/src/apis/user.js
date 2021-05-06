@@ -1,5 +1,6 @@
 import { Router } from 'express';
-import { hash } from 'bcryptjs';
+import { hash, compare, compareSync } from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 
 import User from '../models/user';
 
@@ -61,6 +62,31 @@ router.post('/', async (req, res) => {
     return res.status(200).json({ success: true, user });
   } catch (err) {
     res.status(400).json({ success: false, error: err });
+  }
+});
+
+router.post('/login', async (req, res) => {
+  const { email, password } = req.body;
+  const user = await User.findOne({ email });
+
+  if (!user) {
+    res.status(500).json({ success: false, error: 'User not found' });
+  }
+
+  if (user && compareSync(password, user.passwordHash)) {
+    const token = jwt.sign(
+      {
+        userId: user.id,
+        isAdmin: user.isAdmin,
+      },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: '1d',
+      },
+    );
+    res.status(200).json({ success: true, user: user.email, token });
+  } else {
+    res.status(400).json({ success: false, msg: 'Invalid credentials' });
   }
 });
 
