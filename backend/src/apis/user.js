@@ -90,4 +90,35 @@ router.post('/login', async (req, res) => {
   }
 });
 
+router.get('/get/count', async (req, res) => {
+  const userCount = await User.countDocuments((count) => count);
+
+  if (!userCount) {
+    res.status(500).json({ success: false });
+  }
+
+  res.send({
+    userCount,
+  });
+});
+
+router.delete('/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    await User.findByIdAndRemove(id).then((user) => {
+      if (user) {
+        return res
+          .status(200)
+          .json({ success: true, message: 'user deleted successfully' });
+      } else {
+        return res
+          .status(404)
+          .json({ success: false, message: 'user not found' });
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err });
+  }
+});
+
 export default router;
